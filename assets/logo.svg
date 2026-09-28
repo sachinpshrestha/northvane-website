@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Northvane Energy">
+  <rect width="48" height="48" rx="12" fill="#0A2540"/>
+  <!-- The "N": two uprights joined by a diagonal that doubles as a wind vane -->
+  <path d="M14 34V14l20 20V14" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Vane tip pointing north-east -->
+  <path d="M30 10h8v8" fill="none" stroke="#4DA3FF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M38 10l-7 7" stroke="#4DA3FF" stroke-width="4" stroke-linecap="round"/>
+</svg>
