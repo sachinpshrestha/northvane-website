@@ -22,6 +22,7 @@
   var status = document.getElementById('job-board-status');
   var fallback = document.getElementById('job-board-fallback');
   var loaded = false;
+  var stage = 'loading the Lightning Out script';
 
   function describe(reason) {
     if (!reason) return 'unknown error';
@@ -63,8 +64,13 @@
     }
   });
 
+  // Promise rejections from the Salesforce framework are otherwise silent.
+  window.addEventListener('unhandledrejection', function (e) {
+    if (!loaded) fail('While ' + stage + ': ' + describe(e && e.reason));
+  });
+
   var timer = window.setTimeout(function () {
-    fail('Timed out after ' + TIMEOUT_MS / 1000 + ' seconds waiting for Salesforce.');
+    fail('Timed out after ' + TIMEOUT_MS / 1000 + ' seconds while ' + stage + '.');
   }, TIMEOUT_MS);
 
   if (!window.$Lightning) {
@@ -74,7 +80,9 @@
   }
 
   try {
+    stage = 'loading the app ' + APP + ' from ' + SITE_URL;
     window.$Lightning.use(APP, function () {
+      stage = 'creating the job board component';
       window.$Lightning.createComponent(COMPONENT, PROPS, 'job-board', function (cmp, createStatus, error) {
         if (createStatus && createStatus !== 'SUCCESS') {
           fail('Component ' + createStatus + ': ' + describe(error));
