@@ -126,3 +126,4 @@ section.tint { background: var(--surface); }
   html { scroll-behavior: auto; }
   .btn { transition: none; }
 }
+.job-board-error { margin: 0 24px 24px; padding: 12px 14px; border-radius: 10px; background: var(--surface); color: var(--slate); font-size: 14px; font-family: ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }

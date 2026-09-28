@@ -16,42 +16,74 @@
     successTitle: 'Thanks, your application is in',
     successMessage: 'A Northvane recruiter will review it and reply within five working days.'
   };
+  var TIMEOUT_MS = 45000;
 
   var container = document.getElementById('job-board');
   var status = document.getElementById('job-board-status');
   var fallback = document.getElementById('job-board-fallback');
-  var done = false;
+  var loaded = false;
 
+  function describe(reason) {
+    if (!reason) return 'unknown error';
+    if (typeof reason === 'string') return reason;
+    if (reason.message) return reason.message;
+    try { return JSON.stringify(reason); } catch (e) { return String(reason); }
+  }
+
+  // Shows the fallback link plus the technical reason, so a failure can be diagnosed.
   function fail(reason) {
-    if (done) return;
-    done = true;
-    if (window.console) console.warn('Job board did not load:', reason);
+    if (loaded) return;
+    var text = describe(reason);
+    if (window.console) console.error('[Northvane job board] did not load:', reason);
     status.textContent = 'Open roles are unavailable right now.';
+    var detail = document.getElementById('job-board-error');
+    if (!detail) {
+      detail = document.createElement('p');
+      detail.id = 'job-board-error';
+      detail.className = 'job-board-error';
+      container.appendChild(detail);
+    }
+    detail.textContent = 'Details: ' + text;
     fallback.hidden = false;
   }
 
-  // Give up after 20 seconds so visitors always get a way forward.
-  var timer = window.setTimeout(function () { fail('timed out'); }, 20000);
+  function succeed() {
+    loaded = true;
+    window.clearTimeout(timer);
+    fallback.hidden = true;
+    var detail = document.getElementById('job-board-error');
+    if (detail) detail.parentNode.removeChild(detail);
+    if (status && status.parentNode === container) container.removeChild(status);
+  }
+
+  window.addEventListener('error', function (e) {
+    // Script errors from Salesforce files usually explain a failed load.
+    if (!loaded && e && e.filename && e.filename.indexOf('force.com') + e.filename.indexOf('site.com') > -2) {
+      fail(e.message + ' (' + e.filename.split('/').pop() + ')');
+    }
+  });
+
+  var timer = window.setTimeout(function () {
+    fail('Timed out after ' + TIMEOUT_MS / 1000 + ' seconds waiting for Salesforce.');
+  }, TIMEOUT_MS);
 
   if (!window.$Lightning) {
-    fail('lightning.out.js did not load');
+    fail('The Salesforce Lightning Out script did not load (' + SITE_URL + '/lightning/lightning.out.js). '
+      + 'A browser extension or privacy setting may be blocking it.');
     return;
   }
 
   try {
     window.$Lightning.use(APP, function () {
       window.$Lightning.createComponent(COMPONENT, PROPS, 'job-board', function (cmp, createStatus, error) {
-        window.clearTimeout(timer);
         if (createStatus && createStatus !== 'SUCCESS') {
-          fail(error || createStatus);
+          fail('Component ' + createStatus + ': ' + describe(error));
           return;
         }
-        done = true;
-        if (status && status.parentNode === container) container.removeChild(status);
+        succeed();
       });
     }, SITE_URL);
   } catch (e) {
-    window.clearTimeout(timer);
-    fail(e && e.message ? e.message : e);
+    fail(e);
   }
 })();
