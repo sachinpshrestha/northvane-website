@@ -89,24 +89,16 @@
         <p>Search by keyword or location, open a role to read the details, and apply without leaving this page.</p>
       </div>
 
-      <div class="jobs-frame">
-        <div class="jobs-frame-bar">
-          <span>Job listings update automatically as roles open and close.</span>
-          <a id="careers-link" href="https://yachting-dev-ed.develop.my.site.com/s/" target="_blank" rel="noopener">Open in a new tab</a>
-        </div>
-        <!--
-          The job board and application form are a Salesforce Experience Cloud site (CCP Recruit).
-          For this frame to display, the site must allow framing by this website's domain:
-          Experience Builder > Settings > Security & Privacy > Clickjack Protection Level.
-        -->
-        <iframe
-          id="careers-frame"
-          src="https://yachting-dev-ed.develop.my.site.com/s/"
-          title="Northvane Energy open roles and application form"
-          loading="lazy"
-          referrerpolicy="strict-origin-when-cross-origin"></iframe>
+      <!--
+        The job board and application form are the CCP Recruit "atsJobBoard" component,
+        placed directly on this page with Salesforce Lightning Out (no iframe). It runs as
+        the Experience Cloud site's guest user; this website's origin must be in the org's
+        CORS allowlist, and its domain in the reCAPTCHA key's allowed domains.
+      -->
+      <div class="job-board" id="job-board" aria-live="polite">
+        <p class="job-board-status" id="job-board-status">Loading open roles…</p>
       </div>
-      <p class="frame-note">Trouble seeing the roles? <a href="https://yachting-dev-ed.develop.my.site.com/s/" target="_blank" rel="noopener">Open the careers site directly</a>.</p>
+      <p class="frame-note" id="job-board-fallback" hidden>We couldn't load the roles here. <a href="https://yachting-dev-ed.develop.my.site.com/s/" target="_blank" rel="noopener">Open the careers site directly</a>.</p>
     </div>
   </section>
 </main>
@@ -131,5 +123,12 @@
   </div>
 </footer>
 
+<!-- reCAPTCHA v3: the job board asks this page for a token through the bridge below. -->
+<script src="https://www.google.com/recaptcha/api.js?render=6LcKWQMtAAAAAKmCaWG7DLV4EKO5FR60xcyX3JgF" async defer></script>
+<script src="assets/recaptcha-bridge.js"></script>
+
+<!-- Salesforce Lightning Out, served by the CCP Recruit Experience Cloud site. -->
+<script src="https://yachting-dev-ed.develop.my.site.com/lightning/lightning.out.js"></script>
+<script src="assets/job-board.js"></script>
 </body>
 </html>

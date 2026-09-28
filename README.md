@@ -18,13 +18,21 @@ python -m http.server 8080
 # open http://localhost:8080/careers.html
 ```
 
-## Letting the job board load in the frame
+## How the job board is embedded (Lightning Out)
 
-The job board is the **Job Posting & Application** Experience Cloud site
-(`https://yachting-dev-ed.develop.my.site.com/s/`). Its clickjack protection is
-**"Allow framing by the same origin only"**, so any other website shows an empty frame.
+`careers.html` places the CCP Recruit `atsJobBoard` component directly on the page with Salesforce
+Lightning Out. There is no iframe, so the site's clickjack setting doesn't matter.
 
-To allow it: **Experience Builder → Settings → Security & Privacy → Clickjack Protection Level**.
-Choose **"Allow framing by specific external domains"** (named "Allow framing of site pages on external
-domains" in some releases), add each website that may frame the site to **Trusted Domains for Inline Frames**
-(for example `http://localhost:8080` for testing, and the customer's real domain), then **Publish** the site.
+- `assets/job-board.js` loads the Lightning Out app `c:ccpRecruitOut` from the Experience Cloud site
+  (`https://yachting-dev-ed.develop.my.site.com`) and creates the component with Northvane's titles.
+  Applications are tagged with Source "Company Website".
+- `assets/recaptcha-bridge.js` answers the component's reCAPTCHA token requests.
+
+Requirements in Salesforce and Google:
+
+1. **Lightning Out app** `force-app/main/default/aura/ccpRecruitOut` (deployed). It gives guest access and
+   is unstyled, so Salesforce's styles don't leak into this page.
+2. **CORS allowlist** entries for each website origin (`force-app/main/default/corsWhitelistOrigins`,
+   deployed for `https://sachinpshrestha.github.io` and `http://localhost:8080`).
+3. **reCAPTCHA domains:** in the Google reCAPTCHA admin console, add the website's domain
+   (`sachinpshrestha.github.io`, `localhost`) to the site key, or applications are rejected at submit.
